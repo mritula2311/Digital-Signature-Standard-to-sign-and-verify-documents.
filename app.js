@@ -60,7 +60,7 @@ function showSection(sectionId) {
 }
 
 // Key Generation (with fallback to RSA for compatibility)
-function generateDSAKeys() {
+async function generateDSAKeys() {
   const generateBtn = document.getElementById('generateKeysBtn');
   const keyOutput = document.getElementById('keyOutput');
   const techDetails = document.getElementById('keyTech');
@@ -77,11 +77,11 @@ function generateDSAKeys() {
     
     try {
       // Attempt DSA key generation
-      keyPair = KEYUTIL.generateKeypair('DSA', 2048);
+      keyPair = await KEYUTIL.generateKeypair('DSA', 2048);
     } catch (dsaError) {
       console.warn('DSA generation failed, falling back to RSA:', dsaError);
       keyType = 'RSA';
-      keyPair = KEYUTIL.generateKeypair('RSA', 2048);
+      keyPair = await KEYUTIL.generateKeypair('RSA', 2048);
     }
     
     dsaKeyPair = keyPair;
@@ -188,7 +188,7 @@ function handleFileUpload(file) {
   }
   
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     let content = e.target.result;
     
     currentDocument = {
@@ -201,12 +201,12 @@ function handleFileUpload(file) {
     // Generate SHA-256 hash
     let hash;
     if (typeof content === 'string') {
-      hash = KJUR.crypto.Util.sha256(content);
+      hash = await KJUR.crypto.Util.sha256(content);
     } else {
       // Convert ArrayBuffer to string for hashing
       const uint8Array = new Uint8Array(content);
       const contentStr = Array.from(uint8Array).map(b => String.fromCharCode(b)).join('');
-      hash = KJUR.crypto.Util.sha256(contentStr);
+      hash = await KJUR.crypto.Util.sha256(contentStr);
       currentDocument.contentStr = contentStr;
     }
     
@@ -242,7 +242,7 @@ Ready for digital signature.`;
 }
 
 // Document Signing
-function signDocument() {
+async function signDocument() {
   if (!currentDocument || !dsaKeyPair || !dsaKeyPair.prvKeyObj) {
     showMessage('Document and private key required for signing', 'error');
     return;
@@ -277,7 +277,7 @@ function signDocument() {
     const sig = new KJUR.crypto.Signature({alg: algorithm});
     sig.init(dsaKeyPair.prvKeyObj);
     sig.updateString(contentToSign);
-    const signature = sig.sign();
+    const signature = await sig.sign();
     
     currentSignature = {
       signature: signature,
@@ -391,7 +391,7 @@ function downloadSignedDocument() {
 }
 
 // Verification
-function verifySignature(bundle) {
+async function verifySignature(bundle) {
   const verifyResult = document.getElementById('verifyResult');
   const verifyTech = document.getElementById('verifyTech');
   
@@ -400,7 +400,7 @@ function verifySignature(bundle) {
     const documentContent = atob(bundle.document.content);
     
     // Verify hash
-    const computedHash = KJUR.crypto.Util.sha256(documentContent);
+    const computedHash = await KJUR.crypto.Util.sha256(documentContent);
     const hashValid = computedHash === bundle.document.hash;
     
     // Determine algorithm
@@ -410,7 +410,7 @@ function verifySignature(bundle) {
     const sig = new KJUR.crypto.Signature({alg: algorithm});
     sig.init(bundle.publicKey.data);
     sig.updateString(documentContent);
-    const signatureValid = sig.verify(bundle.signature.signature);
+    const signatureValid = await sig.verify(bundle.signature.signature);
     
     const isValid = hashValid && signatureValid;
     
@@ -564,10 +564,10 @@ document.addEventListener('DOMContentLoaded', function() {
     verifyBtn.addEventListener('click', function() {
       if (signedFileInput && signedFileInput.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
           try {
             const bundle = JSON.parse(e.target.result);
-            verifySignature(bundle);
+            await verifySignature(bundle);
           } catch (error) {
             showMessage('Invalid signed document format', 'error');
           }
