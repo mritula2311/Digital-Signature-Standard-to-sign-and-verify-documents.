@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSS Digital Document Signer</title>
+    <link href="style.css" rel="stylesheet" />
+    <!-- jsrsasign crypto library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.8.2/lib/jsrsasign-all-min.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container flex items-center justify-between py-16">
+        <h1 class="site-title">Digital Signature Standard Demo</h1>
+        <nav class="nav flex gap-16">
+          <a href="#home" class="nav__link" data-section-link>Home</a>
+          <a href="#keys" class="nav__link" data-section-link>Key&nbsp;Generation</a>
+          <a href="#sign" class="nav__link" data-section-link>Sign&nbsp;Document</a>
+          <a href="#verify" class="nav__link" data-section-link>Verify&nbsp;Signature</a>
+        </nav>
+        <button id="themeToggle" class="btn btn--secondary btn--sm" title="Toggle dark/light mode">🌙</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- HOME SECTION -->
+      <section id="home" class="app-section container">
+        <h2 class="mb-8">What is the Digital Signature Standard (DSS)?</h2>
+        <p class="mb-8">
+          The Digital Signature Standard (DSS) is a Federal Information Processing
+          Standard that defines the algorithms used to create and verify digital
+          signatures. DSS specifies the <strong>Digital Signature Algorithm (DSA)</strong>,
+          which provides <em>authentication</em>, <em>integrity</em>, and <em>non-repudiation</em> for
+          electronic documents.
+        </p>
+        <h3 class="mb-8">How does it work?</h3>
+        <ol class="workflow-list mb-16">
+          <li><strong>Key Generation</strong> – generate secure parameters <code>p, q, g</code> and a key pair (<code>x</code>, <code>y</code>).</li>
+          <li><strong>Signing</strong> – hash the document with SHA-256, then compute signature components <code>(r, s)</code> using the private key.</li>
+          <li><strong>Verification</strong> – recompute the hash and verify <code>(r, s)</code> using the public key.</li>
+        </ol>
+        <p class="status status--info">
+          Explore the tabs above to generate keys, sign documents, and verify
+          signatures right in your browser — all operations happen locally.
+        </p>
+      </section>
+
+      <!-- KEY GENERATION SECTION -->
+      <section id="keys" class="app-section container hidden">
+        <h2 class="mb-16">DSA Key Generation</h2>
+        <div class="card mb-16">
+          <div class="card__body">
+            <button id="generateKeysBtn" class="btn btn--primary mb-16">Generate 2048-bit Key Pair</button>
+            <p class="text-small mb-8">Parameters comply with FIPS 186-4 using SHA-256.</p>
+            <div id="keyOutput" class="key-output"></div>
+            <div class="flex gap-16 mt-8">
+              <button id="downloadPrivateBtn" class="btn btn--secondary btn--sm" disabled>Download Private Key</button>
+              <button id="downloadPublicBtn" class="btn btn--secondary btn--sm" disabled>Download Public Key</button>
+              <label class="btn btn--outline btn--sm">
+                <input type="file" id="loadKeyInput" accept="application/json,.json" class="hidden" />Load Key
+              </label>
+            </div>
+          </div>
+        </div>
+        <details class="tech-details">
+          <summary>Technical details</summary>
+          <pre id="keyTech"></pre>
+        </details>
+      </section>
+
+      <!-- SIGNING SECTION -->
+      <section id="sign" class="app-section container hidden">
+        <h2 class="mb-16">Sign a Document</h2>
+        <div class="card mb-16">
+          <div class="card__body flex flex-col gap-16">
+            <div class="flex gap-16 items-center">
+              <label class="btn btn--outline btn--sm">
+                <input id="fileInput" type="file" class="hidden" />Choose File
+              </label>
+              <span id="fileName">No file chosen</span>
+            </div>
+            <div class="flex gap-16 items-center">
+              <button id="signBtn" class="btn btn--primary" disabled>Sign Document</button>
+              <button id="downloadSignedBtn" class="btn btn--secondary" disabled>Download Signed Bundle</button>
+            </div>
+            <div id="hashOutput" class="mono"></div>
+            <div id="signatureOutput"></div>
+          </div>
+        </div>
+        <details class="tech-details">
+          <summary>Technical details</summary>
+          <pre id="signTech"></pre>
+        </details>
+      </section>
+
+      <!-- VERIFICATION SECTION -->
+      <section id="verify" class="app-section container hidden">
+        <h2 class="mb-16">Verify Signature</h2>
+        <div class="card mb-16">
+          <div class="card__body flex flex-col gap-16">
+            <label class="btn btn--outline btn--sm">
+              <input type="file" id="signedFileInput" accept="application/json,.json" class="hidden" />Choose Signed Bundle
+            </label>
+            <div class="flex gap-16 items-center">
+              <button id="verifyBtn" class="btn btn--primary" disabled>Verify</button>
+            </div>
+            <div id="verifyResult"></div>
+          </div>
+        </div>
+        <details class="tech-details">
+          <summary>Technical details</summary>
+          <pre id="verifyTech"></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer py-16">
+      <div class="container">
+        <p class="text-small">
+          All cryptographic operations are performed client-side with
+          <a href="https://kjur.github.io/jsrsasign/" target="_blank">jsrsasign</a>.
+          For production use, always employ validated, peer-reviewed libraries.
+        </p>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
